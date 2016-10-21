@@ -5,6 +5,14 @@
     android:orientation="vertical">
 
     <EditText
+        android:id="@+id/name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="5dp"
+        android:hint="Type your name id"
+        android:inputType="textEmailAddress" />
+
+    <EditText
         android:id="@+id/id"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -20,12 +28,5 @@
         android:hint="Type password"
         android:inputType="textPassword" />
 
-    <!--<EditText-->
-        <!--android:id="@+id/retype_pass"-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_marginTop="5dp"-->
-        <!--android:hint="Retype password"-->
-        <!--android:inputType="textPassword" />-->
 
 </LinearLayout>

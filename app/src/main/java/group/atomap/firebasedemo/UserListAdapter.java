@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import group.atomap.firebasedemo.firebasechat.User;
 
 
 /**
@@ -19,9 +20,9 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
 
     private Context mContext;
     //private ArrayList<User> mUsers;
-    private ArrayList<String> mUsers;
+    private ArrayList<User> mUsers;
 
-    public UserListAdapter(Context mContext, ArrayList<String> mUsers) {
+    public UserListAdapter(Context mContext, ArrayList<User> mUsers) {
         this.mContext = mContext;
         this.mUsers = mUsers;
     }
@@ -35,7 +36,7 @@ public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserVi
     @Override
     public void onBindViewHolder(UserViewHolder holder, int position) {
 //        holder.tvName.setText(mUsers.get(position).getUserName());
-        holder.tvName.setText(mUsers.get(position));
+        holder.tvName.setText(mUsers.get(position).getUserName());
     }
 
     @Override

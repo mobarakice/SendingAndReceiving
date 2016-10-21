@@ -18,6 +18,9 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Map;
+
+import group.atomap.firebasedemo.firebasechat.User;
 
 
 public class UserList extends AppCompatActivity {
@@ -25,15 +28,15 @@ public class UserList extends AppCompatActivity {
     private UserListAdapter mAdapter;
     private LinearLayoutManager mManager;
     private RecyclerView mRecyclerView;
-    // private ArrayList<User> mUsers;
+    private ArrayList<User> mUsers;
 
 //    private DatabaseReference mDatabaseReference;
 //    private ValueEventListener mValueEventListener;
 
     private static final String TAG = "UserList";
-    private DatabaseReference userlistReference;
+    private DatabaseReference dbReference;
     private ValueEventListener mUserListListener;
-    private ArrayList<String> usernamelist = new ArrayList<>();
+    private ArrayList<String> userNamelist = new ArrayList<>();
 
     private Firebase mFirebase;
 
@@ -43,6 +46,8 @@ public class UserList extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_list);
 
+        mUsers = new ArrayList<>();
+
         mRecyclerView = (RecyclerView) findViewById(R.id.recyle_view);
         mRecyclerView.setHasFixedSize(true);
         mManager = new LinearLayoutManager(this);
@@ -50,93 +55,47 @@ public class UserList extends AppCompatActivity {
         mFirebase = new Firebase("https://fir-demo-88ca7.firebaseio.com");
 
 
-        //userlistReference = FirebaseDatabase.getInstance().getReference().child("users");
-
-//        userlistReference.addValueEventListener(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                usernamelist = (ArrayList<String>) dataSnapshot.getValue();
-//                //if(usernamelist==null)return;
-//                Log.i(TAG, "onDataChange: " + dataSnapshot);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "onCancelled: ", databaseError.toException());
-//                Toast.makeText(UserList.this, "Failed to load User list.",
-//                        Toast.LENGTH_SHORT).show();
-//
-//            }
-//        });
-        getEmail();
-
-        mAdapter = new UserListAdapter(UserList.this, usernamelist);
+        dbReference = FirebaseDatabase.getInstance().getReference().child("users");
+        onStart();
+        mAdapter = new UserListAdapter(UserList.this, mUsers);
         mRecyclerView.setAdapter(mAdapter);
-
-        //mUserListListener = userlistReference;
-
-//        onStart();
-
-
     }
 
-//    private ValueEventListener userListListener = new ValueEventListener() {
-//        @Override
-//        public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//            usernamelist = (ArrayList<String>) dataSnapshot.getValue();
-//            if(usernamelist==null){
-//                return;
-//            }
-//            for (String name : usernamelist) {
-//                User u = new User();
-//                u.setUserName(name);
-//                mUsers.add(u);
-//            }
-//            mAdapter.notifyDataSetChanged();
-//            usernamelist.remove(usernameOfCurrentUser());
-//
-//        }
-//
-//        @Override
-//        public void onCancelled(DatabaseError databaseError) {
-//            Log.w("seelog", "onCancelled: ", databaseError.toException());
-//            Toast.makeText(UserList.this, "Failed to load User list.",
-//                    Toast.LENGTH_SHORT).show();
-//        }
-//
-//    };
-//
-////    @Override
-////    protected void onStart() {
-////        super.onStart();
-////        mDatabaseReference.addValueEventListener(userListListener);
-////        mValueEventListener = userListListener;
-////    }
-//
-//    public String usernameOfCurrentUser() {
-//        String email = LoginActivity.mAuth.getCurrentUser().getEmail();
-//        if (email.contains("@")) {
-//            return email.split("@")[0];
-//        } else {
-//            return email;
-//        }
-//    }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//
-//        // Remove post value event listener
-//        if (mValueEventListener != null) {
-//            mDatabaseReference.removeEventListener(mValueEventListener);
-//        }
-//
-//    }
+    private ValueEventListener userListListener = new ValueEventListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            Log.d("dataSnapshot: >>>>", "seelog: " + dataSnapshot);
 
-//    @Override
-//    protected void onStart() {
-//        super.onStart();
+            Map<String, User> mMap = (Map<String, User>) dataSnapshot.getValue();
+//           ArrayList<User> users= new ArrayList<User>(mMap.values());
+
+            for (Map.Entry m : mMap.entrySet()) {
+                Log.d("User: >>>>", "seelog: " + m.getKey());
+                User user = new User(m.getValue());
+                Log.d("User: >>>>", "seelog: " + user.getUserName());
+                // mUsers.add((User) m.getValue());
+            }
+            //mUsers.addAll(mMap.values());
+
+//            mAdapter.notifyDataSetChanged();
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            Log.w("seelog", "onCancelled: ", databaseError.toException());
+            Toast.makeText(UserList.this, "Failed to load User list.",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        dbReference.addValueEventListener(userListListener);
+        mUserListListener = userListListener;
 //        final ValueEventListener userListener = new ValueEventListener() {
 //            @Override
 //            public void onDataChange(DataSnapshot dataSnapshot) {
@@ -158,32 +117,10 @@ public class UserList extends AppCompatActivity {
 //                        Toast.LENGTH_SHORT).show();
 //            }
 //        };
-//        userlistReference.addValueEventListener(userListener);
-//
-//        mUserListListener = userListener;
-//    }
-
-
-    private void getEmail() {
-//        String uid = mFirebase.getAuth().getUid();
-//        mFirebase.addAuthStateListener(new Firebase.AuthStateListener() {
-//            @Override
-//            public void onAuthStateChanged(AuthData authData) {
-//                authData.getUid();
-//            }
-//        });
-        mFirebase.addValueEventListener(new com.firebase.client.ValueEventListener() {
-            @Override
-            public void onDataChange(com.firebase.client.DataSnapshot dataSnapshot) {
-                usernamelist = (ArrayList<String>) dataSnapshot.getValue();
-            }
-
-            @Override
-            public void onCancelled(FirebaseError firebaseError) {
-
-            }
-        });
+//        dbReference.addValueEventListener(userListListener);
+//        mUserListListener = userListListener;
     }
+
 
     public String usernameOfCurrentUser() {
         String email = LoginActivity.mAuth.getCurrentUser().getEmail();
@@ -193,16 +130,16 @@ public class UserList extends AppCompatActivity {
             return email;
         }
     }
-//
-//    @Override
-//    public void onStop() {
-//        super.onStop();
-//
-//        // Remove post value event listener
-//        if (mUserListListener != null) {
-//            userlistReference.removeEventListener(mUserListListener);
-//        }
-//
-//    }
+
+    //
+    @Override
+    public void onStop() {
+        super.onStop();
+        // Remove post value event listener
+        if (mUserListListener != null) {
+            dbReference.removeEventListener(mUserListListener);
+        }
+
+    }
 
 }

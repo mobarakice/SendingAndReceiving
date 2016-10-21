@@ -11,6 +11,25 @@ public class User implements Serializable {
     private String userId;
     private String userEmail;
 
+    public User() {
+
+    }
+
+    public User(Object value) {
+
+    }
+
+    public User(String userName, String userId) {
+        this.userName = userName;
+        this.userId = userId;
+    }
+
+    public User(String userName, String userId, String userEmail) {
+        this(userName, userId);
+        this.userEmail = userEmail;
+
+    }
+
     public String getUserName() {
         return userName;
     }

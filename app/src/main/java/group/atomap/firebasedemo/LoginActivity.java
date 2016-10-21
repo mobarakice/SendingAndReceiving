@@ -26,6 +26,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.util.ArrayList;
 
 import group.atomap.firebasedemo.firebasechat.ConversationActivity;
+import group.atomap.firebasedemo.firebasechat.User;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -34,10 +35,7 @@ public class LoginActivity extends AppCompatActivity {
     private ProgressDialog mDialog;
     private Firebase refFirebase;
     public static FirebaseAuth mAuth;
-    private AuthResult mAuthResult;
-    private AuthData mAuthData;
-    private FirebaseUser mFirebaseUser;
-    private FirebaseDatabase mDatabase;
+//    private FirebaseDatabase mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,26 +54,9 @@ public class LoginActivity extends AppCompatActivity {
 
         refFirebase = new Firebase("https://fir-demo-88ca7.firebaseio.com");
         mAuth = FirebaseAuth.getInstance();
-        //mFirebaseUser = mAuth.getCurrentUser().getUid();
 
     }
 
-//    private void createUser(final String email, final String password) {
-//        if (email == null || password == null) {
-//            return;
-//        }
-//        refFirebase.createUser(email, password, new Firebase.ValueResultHandler<Map<String, Object>>() {
-//            @Override
-//            public void onSuccess(Map<String, Object> stringObjectMap) {
-//                Log.d("Successfully created", "seelog: " + "ID: " + stringObjectMap.get(email) + "\t Pass: " + stringObjectMap.get(password));
-//            }
-//
-//            @Override
-//            public void onError(FirebaseError firebaseError) {
-//                Toast.makeText(getApplicationContext(), "Account creation failed.", Toast.LENGTH_LONG).show();
-//            }
-//        });
-//    }
 
     private void login(String email, String password) {
         showDialog();
@@ -90,7 +71,7 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Log.d("seelog", "signInWithEmail:onComplete:" + task.isSuccessful());
                     hideDialog();
-                    startActivity(new Intent(LoginActivity.this, ConversationActivity.class));
+                    startActivity(new Intent(LoginActivity.this, UserList.class));
                     finish();
                 } else {
                     Log.w("seelog", "signInWithEmail:failed", task.getException());
@@ -127,6 +108,7 @@ public class LoginActivity extends AppCompatActivity {
     public void onClickRegister(View view) {
         final AlertDialog.Builder alertDialog = new AlertDialog.Builder(LoginActivity.this);
         final View dialogView = LayoutInflater.from(LoginActivity.this).inflate(R.layout.registration, null);
+        final EditText name = (EditText) dialogView.findViewById(R.id.name);
         final EditText email = (EditText) dialogView.findViewById(R.id.id);
         final EditText pass = (EditText) dialogView.findViewById(R.id.pass);
         alertDialog.setView(dialogView);
@@ -134,9 +116,10 @@ public class LoginActivity extends AppCompatActivity {
                 .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        String id = email.getText().toString();
+                        String userName = name.getText().toString();
+                        String userEmail = email.getText().toString();
                         String password = pass.getText().toString();
-                        createNewUser(id, password);
+                        createNewUserWithEmail(userName, userEmail, password);
                     }
                 })
                 .setNegativeButton(android.R.string.no, new DialogInterface.OnClickListener() {
@@ -145,7 +128,6 @@ public class LoginActivity extends AppCompatActivity {
 
                     }
                 }).create();
-
         alertDialog.show();
 
     }
@@ -162,7 +144,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    private void createNewUser(final String email, String pass) {
+    private void createNewUserWithEmail(final String name, final String email, String pass) {
         showDialog();
         if (TextUtils.isEmpty(email) || TextUtils.isEmpty(pass)) {
             return;
@@ -175,10 +157,9 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     Log.d("Successfully created", "seelog: " + "ID: " + task.getResult().getUser().getUid() + "\t Pass: " + task.getResult().getUser().getEmail());
                     Toast.makeText(LoginActivity.this, "Successfully registered", Toast.LENGTH_LONG).show();
-//                    User user = new User();
-//                    user.setUserId(task.getResult().getUser().getUid());
-//                    user.setUserEmail(email);
-//                    Util.mUser.add(user);
+                    String userId = task.getResult().getUser().getUid();
+                    User user = new User(name, userId, email);
+                    createNewUser(user);
                     hideDialog();
                 } else {
                     Toast.makeText(LoginActivity.this, "Registration Error", Toast.LENGTH_LONG).show();
@@ -189,10 +170,9 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
-    public static ArrayList<String> getAllUId(FirebaseAuth firebaseAuth) {
-        firebaseAuth.getCurrentUser().getUid();
-
-        return null;
+    private void createNewUser(User user) {
+        refFirebase.child("users").child(user.getUserId()).setValue(user);
     }
+
 
 }
