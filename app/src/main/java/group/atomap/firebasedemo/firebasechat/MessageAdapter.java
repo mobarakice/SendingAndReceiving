@@ -38,7 +38,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.MVHolder
     @Override
     public void onBindViewHolder(MVHolder holder, int position) {
 
-        if (mDataset.get(position).getmSender().equalsIgnoreCase("Alimul")) {
+        if (mDataset.get(position).getmSender().equalsIgnoreCase(ConversationActivity.mSender)) {
             holder.tvSend.setText(mDataset.get(position).getmText());
             holder.tvSendTime.setText(mDataset.get(position).getTime());
             holder.receiveLayout.setVisibility(View.GONE);

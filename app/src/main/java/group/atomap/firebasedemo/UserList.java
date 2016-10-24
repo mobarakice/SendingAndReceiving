@@ -103,7 +103,7 @@ public class UserList extends AppCompatActivity {
         return new User(singleUser.get(2), singleUser.get(1), singleUser.get(0));
     }
 
-    public String currentUserId() {
+    public static String currentUserId() {
         String uId = LoginActivity.mAuth.getCurrentUser().getUid();
         return uId;
     }

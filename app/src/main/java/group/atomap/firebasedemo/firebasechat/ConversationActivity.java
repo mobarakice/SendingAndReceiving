@@ -8,6 +8,9 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 
 import android.text.TextUtils;
+import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
@@ -32,20 +35,15 @@ import group.atomap.firebasedemo.Util;
 
 public class ConversationActivity extends AppCompatActivity implements View.OnClickListener, MessageDataSource.MessagesCallbacks {
 
-    public static final String USER_EXTRA = "USER";
-
-    public static final String TAG = "ChatActivity";
-
     private ArrayList<Message> mMessages;
-    private String mRecipient;
+    public static String mRecipient;
+    public static String mSender;
     private Date mLastMessageDate = new Date();
-    private String mConvoId;
     private MessageDataSource.MessagesListener mListener;
 
     private RecyclerView mView;
     private LinearLayoutManager manager;
     private MessageAdapter mAdapter;
-    private StringBuilder sb = new StringBuilder();
     private EditText newMessageView;
     LinearLayout layout;
     private String previous = "";
@@ -55,8 +53,9 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         super.onCreate(savedInstanceState);
         setContentView(R.layout.conversation_layout);
 
-
-        mRecipient = "Mobarak";
+        Bundle bundle = getIntent().getBundleExtra(Util.FROM_USER_LIST);
+        mRecipient = bundle.getString(Util.RECEIVER);
+        mSender = bundle.getString(Util.SENDER);
 
         mMessages = new ArrayList<>();
         mView = (RecyclerView) findViewById(R.id.recycler_view);
@@ -68,9 +67,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         layout = (LinearLayout) findViewById(R.id.overlay);
 
         getSupportActionBar().setTitle(mRecipient);
-        if (getSupportActionBar() != null) {
-            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         newMessageView = (EditText) findViewById(R.id.new_message);
         Button sendMessage = (Button) findViewById(R.id.send_message);
@@ -79,11 +76,7 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
         imageButton.setOnClickListener(this);
         previous = newMessageView.getText().toString();
 
-//
-//        String[] ids = {"Alimul", "-", "Mobarak"};
-//        mConvoId = ids[0] + ids[1] + ids[2];
-
-        mListener = MessageDataSource.addMessagesListener("users", this);
+        mListener = MessageDataSource.addMessagesListener("messages", this);
 
     }
 
@@ -110,10 +103,10 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 Message msg = new Message();
                 msg.setmDate(new Date());
                 msg.setmText(newMessage);
-                msg.setmSender("Alimul");
+                msg.setmSender(mSender);
                 msg.setTime(getCurrentTime());
 
-                MessageDataSource.saveMessage(msg, "users");
+                MessageDataSource.saveMessage(msg, "messages");
                 break;
             case R.id.imageButton:
 //                mView.setVisibility(View.INVISIBLE);
@@ -194,11 +187,31 @@ public class ConversationActivity extends AppCompatActivity implements View.OnCl
                 break;
             case R.id.btn_done:
                 previous = newMessageView.getText().toString();
-                newMessageView.setText(previous+" ");
+                newMessageView.setText(previous + " ");
                 layout.setVisibility(View.GONE);
                 break;
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+    }
+
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
 

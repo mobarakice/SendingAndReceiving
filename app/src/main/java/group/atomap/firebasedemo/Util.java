@@ -10,5 +10,7 @@ import group.atomap.firebasedemo.database.User;
  */
 
 public class Util {
-    public static ArrayList<User> mUser = new ArrayList<>();
+    public static final String FROM_USER_LIST = "FromUserList";
+    public static final String SENDER = "sender";
+    public static final String RECEIVER = "receiver";
 }
