@@ -19,7 +19,6 @@ import group.atomap.firebasedemo.firebasechat.User;
 public class UserListAdapter extends RecyclerView.Adapter<UserListAdapter.UserViewHolder> {
 
     private Context mContext;
-    //private ArrayList<User> mUsers;
     private ArrayList<User> mUsers;
 
     public UserListAdapter(Context mContext, ArrayList<User> mUsers) {

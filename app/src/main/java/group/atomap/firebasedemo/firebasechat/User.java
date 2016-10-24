@@ -6,17 +6,22 @@ import java.io.Serializable;
  * Created by Tauhid on 10/18/2016.
  */
 
-public class User implements Serializable {
+public class User {
     private String userName;
     private String userId;
     private String userEmail;
+    private User usr;
 
     public User() {
 
     }
 
     public User(Object value) {
+        usr = (User) value;
+    }
 
+    public User getUsr() {
+        return usr;
     }
 
     public User(String userName, String userId) {

@@ -1,5 +1,6 @@
 package group.atomap.firebasedemo;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -18,7 +19,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 
 import group.atomap.firebasedemo.firebasechat.User;
 
@@ -30,13 +36,8 @@ public class UserList extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private ArrayList<User> mUsers;
 
-//    private DatabaseReference mDatabaseReference;
-//    private ValueEventListener mValueEventListener;
-
-    private static final String TAG = "UserList";
     private DatabaseReference dbReference;
     private ValueEventListener mUserListListener;
-    private ArrayList<String> userNamelist = new ArrayList<>();
 
     private Firebase mFirebase;
 
@@ -56,29 +57,37 @@ public class UserList extends AppCompatActivity {
 
 
         dbReference = FirebaseDatabase.getInstance().getReference().child("users");
-        onStart();
         mAdapter = new UserListAdapter(UserList.this, mUsers);
         mRecyclerView.setAdapter(mAdapter);
+
+        dbReference.addValueEventListener(userListListener);
+        mUserListListener = userListListener;
     }
 
     private ValueEventListener userListListener = new ValueEventListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             Log.d("dataSnapshot: >>>>", "seelog: " + dataSnapshot);
+            getChild(dataSnapshot);
+//            for (User user : mUsers) {
+//                Log.d("User>>>>>", "seelog: " + user.getUserName() + "\n" + user.getUserId() + "\n" + user.getUserEmail());
+//            }
+            mAdapter.notifyDataSetChanged();
 
-            Map<String, User> mMap = (Map<String, User>) dataSnapshot.getValue();
-//           ArrayList<User> users= new ArrayList<User>(mMap.values());
+        }
 
-            for (Map.Entry m : mMap.entrySet()) {
-                Log.d("User: >>>>", "seelog: " + m.getKey());
-                User user = new User(m.getValue());
-                Log.d("User: >>>>", "seelog: " + user.getUserName());
-                // mUsers.add((User) m.getValue());
+        private void getChild(DataSnapshot dataSnapshot) {
+            for (DataSnapshot dp : dataSnapshot.getChildren()) {
+                ArrayList<String> singleUser = new ArrayList<>();
+                for (DataSnapshot dp1 : dp.getChildren()) {
+                    String s = (String) dp1.getValue();
+                    singleUser.add(s);
+                }
+                User user = singleUser(singleUser);
+                if (user != null && !user.getUserId().equalsIgnoreCase(currentUserId())) {
+                    mUsers.add(user);
+                }
             }
-            //mUsers.addAll(mMap.values());
-
-//            mAdapter.notifyDataSetChanged();
-
         }
 
         @Override
@@ -90,52 +99,19 @@ public class UserList extends AppCompatActivity {
 
     };
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        dbReference.addValueEventListener(userListListener);
-        mUserListListener = userListListener;
-//        final ValueEventListener userListener = new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//
-//                Log.d("seelog", "dataSnapshot: " + dataSnapshot);
-//                usernamelist = new ArrayList<>((ArrayList) dataSnapshot.getValue());
-//
-//                // usernamelist.remove(usernameOfCurrentUser());
-//                Log.i(TAG, "onDataChange: " + usernamelist.toString());
-//
-//                mAdapter = new UserListAdapter(UserList.this, usernamelist);
-//                mRecyclerView.setAdapter(mAdapter);
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-//                Log.w(TAG, "onCancelled: ", databaseError.toException());
-//                Toast.makeText(UserList.this, "Failed to load User list.",
-//                        Toast.LENGTH_SHORT).show();
-//            }
-//        };
-//        dbReference.addValueEventListener(userListListener);
-//        mUserListListener = userListListener;
+    private User singleUser(ArrayList<String> singleUser) {
+        return new User(singleUser.get(2), singleUser.get(1), singleUser.get(0));
     }
 
-
-    public String usernameOfCurrentUser() {
-        String email = LoginActivity.mAuth.getCurrentUser().getEmail();
-        if (email.contains("@")) {
-            return email.split("@")[0];
-        } else {
-            return email;
-        }
+    public String currentUserId() {
+        String uId = LoginActivity.mAuth.getCurrentUser().getUid();
+        return uId;
     }
 
     //
     @Override
     public void onStop() {
         super.onStop();
-        // Remove post value event listener
         if (mUserListListener != null) {
             dbReference.removeEventListener(mUserListListener);
         }
