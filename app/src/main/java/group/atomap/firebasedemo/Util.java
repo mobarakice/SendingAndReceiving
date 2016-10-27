@@ -13,4 +13,5 @@ public class Util {
     public static final String FROM_USER_LIST = "FromUserList";
     public static final String SENDER = "sender";
     public static final String RECEIVER = "receiver";
+    public static final String ROOT = "messages";
 }
